@@ -1,5 +1,6 @@
 package com.aifani.smartpantrymanager.ui;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /** Binds the list of PantryItem rows from the database to the RecyclerView. */
 public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder> {
@@ -26,8 +28,13 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         void onItemLongClick(PantryItem item);
     }
 
+    /** Items expiring within this many days count as "expiring soon". */
+    private static final int SOON_DAYS = 3;
+    private static final int COLOR_WARNING = 0xFFD32F2F;
+
     private List<PantryItem> items = new ArrayList<>();
     private final OnItemActionListener listener;
+    private boolean highlightExpiring = true;
     private final SimpleDateFormat dateFormat =
             new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
@@ -38,6 +45,12 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
     /** Replaces the data and refreshes the list. */
     public void setItems(List<PantryItem> newItems) {
         this.items = newItems;
+        notifyDataSetChanged();
+    }
+
+    /** Turns the expiring-soon highlight on or off (from the Settings screen). */
+    public void setHighlightExpiring(boolean enabled) {
+        this.highlightExpiring = enabled;
         notifyDataSetChanged();
     }
 
@@ -57,7 +70,20 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         holder.textQuantity.setText(formatQuantity(item.quantity) + " " + item.unit);
 
         if (item.expiryDate != null) {
-            holder.textExpiry.setText("Expires: " + dateFormat.format(new Date(item.expiryDate)));
+            String date = dateFormat.format(new Date(item.expiryDate));
+            long millisLeft = item.expiryDate - System.currentTimeMillis();
+            long daysLeft = TimeUnit.MILLISECONDS.toDays(millisLeft);
+
+            if (highlightExpiring && millisLeft < 0) {
+                holder.textExpiry.setText("Expired: " + date);
+                holder.textExpiry.setTextColor(COLOR_WARNING);
+            } else if (highlightExpiring && daysLeft <= SOON_DAYS) {
+                holder.textExpiry.setText("Expires soon: " + date);
+                holder.textExpiry.setTextColor(COLOR_WARNING);
+            } else {
+                holder.textExpiry.setText("Expires: " + date);
+                holder.textExpiry.setTextColor(holder.defaultExpiryColors);
+            }
             holder.textExpiry.setVisibility(View.VISIBLE);
         } else {
             holder.textExpiry.setVisibility(View.GONE);
@@ -88,12 +114,14 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         final TextView textName;
         final TextView textQuantity;
         final TextView textExpiry;
+        final ColorStateList defaultExpiryColors;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             textName = itemView.findViewById(R.id.textName);
             textQuantity = itemView.findViewById(R.id.textQuantity);
             textExpiry = itemView.findViewById(R.id.textExpiry);
+            defaultExpiryColors = textExpiry.getTextColors();
         }
     }
 }
