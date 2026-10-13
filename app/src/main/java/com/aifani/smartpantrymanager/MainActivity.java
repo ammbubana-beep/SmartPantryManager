@@ -3,7 +3,6 @@ package com.aifani.smartpantrymanager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +19,9 @@ import com.aifani.smartpantrymanager.data.AppDatabase;
 import com.aifani.smartpantrymanager.data.DatabaseSeeder;
 import com.aifani.smartpantrymanager.data.PantryItem;
 import com.aifani.smartpantrymanager.ui.PantryAdapter;
+import com.aifani.smartpantrymanager.util.NavigationHelper;
+import com.aifani.smartpantrymanager.util.SettingsStore;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         recyclerPantry = findViewById(R.id.recyclerPantry);
         textEmpty = findViewById(R.id.textEmpty);
         FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
-        Button buttonSuggest = findViewById(R.id.buttonSuggest);
+        BottomNavigationView nav = findViewById(R.id.bottomNav);
 
         adapter = new PantryAdapter(this);
         recyclerPantry.setLayoutManager(new LinearLayoutManager(this));
@@ -55,9 +57,8 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         fabAdd.setOnClickListener(v ->
                 startActivity(new Intent(this, AddEditIngredientActivity.class)));
 
-        // Opens the Suggested Recipes screen.
-        buttonSuggest.setOnClickListener(v ->
-                startActivity(new Intent(this, SuggestedRecipesActivity.class)));
+        // Bottom navigation: Pantry / Recipes / Settings.
+        NavigationHelper.setup(this, nav, R.id.nav_pantry);
 
         // Load the recipe collection on first run, then show the pantry.
         AppDatabase.databaseExecutor.execute(() -> {
@@ -66,10 +67,11 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         });
     }
 
-    /** Reloads the list every time the screen comes back to the front. */
+    /** Reloads the list and re-reads the settings whenever the screen comes back. */
     @Override
     protected void onResume() {
         super.onResume();
+        adapter.setHighlightExpiring(SettingsStore.isHighlightExpiring(this));
         AppDatabase.databaseExecutor.execute(this::loadPantry);
     }
 
