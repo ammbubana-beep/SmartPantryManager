@@ -3,6 +3,7 @@ package com.aifani.smartpantrymanager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         recyclerPantry = findViewById(R.id.recyclerPantry);
         textEmpty = findViewById(R.id.textEmpty);
         FloatingActionButton fabAdd = findViewById(R.id.fabAdd);
+        Button buttonSuggest = findViewById(R.id.buttonSuggest);
 
         adapter = new PantryAdapter(this);
         recyclerPantry.setLayoutManager(new LinearLayoutManager(this));
@@ -52,6 +54,10 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         // Intent with no extra = "add a new ingredient".
         fabAdd.setOnClickListener(v ->
                 startActivity(new Intent(this, AddEditIngredientActivity.class)));
+
+        // Opens the Suggested Recipes screen.
+        buttonSuggest.setOnClickListener(v ->
+                startActivity(new Intent(this, SuggestedRecipesActivity.class)));
 
         // Load the recipe collection on first run, then show the pantry.
         AppDatabase.databaseExecutor.execute(() -> {
