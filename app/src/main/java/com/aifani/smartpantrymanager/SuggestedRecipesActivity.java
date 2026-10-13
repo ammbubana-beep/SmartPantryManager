@@ -1,7 +1,5 @@
 package com.aifani.smartpantrymanager;
 
-import com.aifani.smartpantrymanager.util.NavigationHelper;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -19,7 +17,9 @@ import com.aifani.smartpantrymanager.data.PantryItem;
 import com.aifani.smartpantrymanager.data.Recipe;
 import com.aifani.smartpantrymanager.data.RecipeIngredient;
 import com.aifani.smartpantrymanager.ui.RecipeAdapter;
+import com.aifani.smartpantrymanager.util.NavigationHelper;
 import com.aifani.smartpantrymanager.util.RecipeMatcher;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
@@ -49,6 +49,9 @@ public class SuggestedRecipesActivity extends AppCompatActivity
         adapter = new RecipeAdapter(this);
         recyclerRecipes.setLayoutManager(new LinearLayoutManager(this));
         recyclerRecipes.setAdapter(adapter);
+
+        BottomNavigationView nav = findViewById(R.id.bottomNav);
+        NavigationHelper.setup(this, nav, R.id.nav_recipes);
     }
 
     /** Re-run the matching every time the screen is shown, so it reflects the pantry. */
@@ -85,8 +88,5 @@ public class SuggestedRecipesActivity extends AppCompatActivity
         Intent intent = new Intent(this, RecipeDetailActivity.class);
         intent.putExtra(RecipeDetailActivity.EXTRA_RECIPE_ID, recipe.id);
         startActivity(intent);
-        BottomNavigationView nav = findViewById(R.id.bottomNav);
-        NavigationHelper.setup(this, nav, R.id.nav_recipes);
     }
-
 }
