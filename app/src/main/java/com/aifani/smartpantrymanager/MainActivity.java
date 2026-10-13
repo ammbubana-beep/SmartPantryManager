@@ -1,11 +1,13 @@
 package com.aifani.smartpantrymanager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -47,8 +49,9 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         recyclerPantry.setLayoutManager(new LinearLayoutManager(this));
         recyclerPantry.setAdapter(adapter);
 
+        // Intent with no extra = "add a new ingredient".
         fabAdd.setOnClickListener(v ->
-                Toast.makeText(this, "Add screen comes in the next step", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, AddEditIngredientActivity.class)));
 
         // Load the recipe collection on first run, then show the pantry.
         AppDatabase.databaseExecutor.execute(() -> {
@@ -76,14 +79,29 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         });
     }
 
+    /** Tapping a row opens the edit screen and passes the item id in the Intent. */
     @Override
     public void onItemClick(PantryItem item) {
-        // Opens the edit screen in the next step.
-        Toast.makeText(this, "Edit: " + item.name, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, AddEditIngredientActivity.class);
+        intent.putExtra(AddEditIngredientActivity.EXTRA_ITEM_ID, item.id);
+        startActivity(intent);
     }
 
+    /** Long-pressing a row asks for confirmation, then deletes it. */
     @Override
     public void onItemLongClick(PantryItem item) {
-        // Delete is added in the next step.
+        new AlertDialog.Builder(this)
+                .setTitle("Delete ingredient?")
+                .setMessage("Remove " + item.name + " from your pantry?")
+                .setPositiveButton("Delete", (dialog, which) ->
+                        AppDatabase.databaseExecutor.execute(() -> {
+                            AppDatabase.getInstance(getApplicationContext())
+                                    .pantryDao().delete(item);
+                            loadPantry();
+                            runOnUiThread(() -> Toast.makeText(this,
+                                    "Ingredient deleted", Toast.LENGTH_SHORT).show());
+                        }))
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }
