@@ -1,5 +1,7 @@
 package com.aifani.smartpantrymanager;
 
+import com.aifani.smartpantrymanager.util.NavigationHelper;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -83,5 +85,8 @@ public class SuggestedRecipesActivity extends AppCompatActivity
         Intent intent = new Intent(this, RecipeDetailActivity.class);
         intent.putExtra(RecipeDetailActivity.EXTRA_RECIPE_ID, recipe.id);
         startActivity(intent);
+        BottomNavigationView nav = findViewById(R.id.bottomNav);
+        NavigationHelper.setup(this, nav, R.id.nav_recipes);
     }
+
 }
