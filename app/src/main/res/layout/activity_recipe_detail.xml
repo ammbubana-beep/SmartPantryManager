@@ -20,6 +20,21 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/textDetailTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textDetailStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -34,6 +49,14 @@
             android:layout_marginTop="8dp"
             android:lineSpacingExtra="4dp"
             android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/buttonAddMissing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Add missing items to my pantry"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="wrap_content"
