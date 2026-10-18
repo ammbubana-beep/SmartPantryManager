@@ -3,24 +3,22 @@ package com.aifani.smartpantrymanager.util;
 import com.aifani.smartpantrymanager.data.PantryItem;
 import com.aifani.smartpantrymanager.data.Recipe;
 import com.aifani.smartpantrymanager.data.RecipeIngredient;
+import com.aifani.smartpantrymanager.data.RecipeMatch;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The strict-matching rule: a recipe qualifies only if EVERY ingredient it needs
- * is in the pantry, in at least the required quantity. No partial matches.
- */
 public final class RecipeMatcher {
 
-    /** Tolerance so that 0.1 + 0.2 style rounding never causes a wrong result. */
     private static final double EPSILON = 1e-9;
+
+    public static final int ALMOST_THERE_MAX_MISSING = 2;
 
     private RecipeMatcher() { }
 
-    /** Returns only the recipes the user can make right now. */
     public static List<Recipe> findMakeable(List<PantryItem> pantry,
                                             List<Recipe> recipes,
                                             List<RecipeIngredient> allIngredients) {
@@ -38,29 +36,66 @@ public final class RecipeMatcher {
         return makeable;
     }
 
-    /** True only if every needed ingredient is available in enough quantity. */
     public static boolean canMake(List<PantryItem> pantry, List<RecipeIngredient> needed) {
         if (needed == null || needed.isEmpty()) return false;
         return countMissing(buildPantryTotals(pantry), needed) == 0;
     }
 
-    /** How many ingredients are missing or too small (useful for an "Almost There" list). */
     public static int countMissing(List<PantryItem> pantry, List<RecipeIngredient> needed) {
         return countMissing(buildPantryTotals(pantry), needed);
     }
 
+    public static List<RecipeIngredient> findMissing(List<PantryItem> pantry,
+                                                     List<RecipeIngredient> needed) {
+        return missingFor(buildPantryTotals(pantry), needed);
+    }
+
+
+    public static List<RecipeMatch> findAlmostThere(List<PantryItem> pantry,
+                                                    List<Recipe> recipes,
+                                                    List<RecipeIngredient> allIngredients,
+                                                    int maxMissing) {
+        Map<String, Double> totals = buildPantryTotals(pantry);
+        Map<Integer, List<RecipeIngredient>> byRecipe = groupByRecipe(allIngredients);
+
+        List<RecipeMatch> result = new ArrayList<>();
+        for (Recipe recipe : recipes) {
+            List<RecipeIngredient> needed = byRecipe.get(recipe.id);
+            if (needed == null || needed.isEmpty()) continue;
+
+            List<RecipeIngredient> missing = missingFor(totals, needed);
+            if (!missing.isEmpty() && missing.size() <= maxMissing) {
+                result.add(new RecipeMatch(recipe, missing));
+            }
+        }
+        Collections.sort(result, (a, b) -> Integer.compare(a.missing.size(), b.missing.size()));
+        return result;
+    }
+
     private static int countMissing(Map<String, Double> totals, List<RecipeIngredient> needed) {
-        int missing = 0;
+        return missingFor(totals, needed).size();
+    }
+
+    private static List<RecipeIngredient> missingFor(Map<String, Double> totals,
+                                                     List<RecipeIngredient> needed) {
+        List<RecipeIngredient> missing = new ArrayList<>();
         for (RecipeIngredient ingredient : needed) {
             Double have = totals.get(key(ingredient.normalizedName, ingredient.unit));
-            if (have == null || have + EPSILON < ingredient.quantity) {
-                missing++;
+            double haveAmount = (have == null) ? 0 : have;
+
+            if (haveAmount + EPSILON < ingredient.quantity) {
+                RecipeIngredient gap = new RecipeIngredient();
+                gap.recipeId = ingredient.recipeId;
+                gap.name = ingredient.name;
+                gap.normalizedName = ingredient.normalizedName;
+                gap.unit = ingredient.unit;
+                gap.quantity = ingredient.quantity - haveAmount;
+                missing.add(gap);
             }
         }
         return missing;
     }
 
-    /** Adds up the pantry by "name + base unit", e.g. "egg|pcs" -> 6. */
     private static Map<String, Double> buildPantryTotals(List<PantryItem> pantry) {
         Map<String, Double> totals = new HashMap<>();
         for (PantryItem item : pantry) {
