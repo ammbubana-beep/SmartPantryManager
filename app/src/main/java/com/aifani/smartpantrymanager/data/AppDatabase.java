@@ -9,10 +9,9 @@ import androidx.room.RoomDatabase;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/** The single database for the app (SQLite through Room). */
 @Database(
         entities = {PantryItem.class, Recipe.class, RecipeIngredient.class},
-        version = 1,
+        version = 2,
         exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -21,7 +20,6 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase instance;
 
-    /** Database work runs here so it never blocks the screen. */
     public static final ExecutorService databaseExecutor =
             Executors.newFixedThreadPool(2);
 
@@ -30,9 +28,11 @@ public abstract class AppDatabase extends RoomDatabase {
             synchronized (AppDatabase.class) {
                 if (instance == null) {
                     instance = Room.databaseBuilder(
-                            context.getApplicationContext(),
-                            AppDatabase.class,
-                            "smart_pantry.db").build();
+                                    context.getApplicationContext(),
+                                    AppDatabase.class,
+                                    "smart_pantry.db")
+                            .fallbackToDestructiveMigration()
+                            .build();
                 }
             }
         }

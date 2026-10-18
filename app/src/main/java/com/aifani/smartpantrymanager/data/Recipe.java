@@ -3,7 +3,6 @@ package com.aifani.smartpantrymanager.data;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-/** One recipe. Its ingredients live in the RecipeIngredient table. */
 @Entity(tableName = "recipes")
 public class Recipe {
 
@@ -12,6 +11,7 @@ public class Recipe {
 
     public String name;
 
-    /** Preparation steps, one step per line. */
     public String steps;
+
+    public int cookingTimeMinutes;
 }
