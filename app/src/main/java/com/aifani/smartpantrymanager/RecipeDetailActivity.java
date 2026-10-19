@@ -1,7 +1,9 @@
 package com.aifani.smartpantrymanager;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +17,8 @@ import com.aifani.smartpantrymanager.data.AppDatabase;
 import com.aifani.smartpantrymanager.data.PantryItem;
 import com.aifani.smartpantrymanager.data.Recipe;
 import com.aifani.smartpantrymanager.data.RecipeIngredient;
+import com.aifani.smartpantrymanager.util.IngredientIcons;
+import com.aifani.smartpantrymanager.util.RecipeImages;
 import com.aifani.smartpantrymanager.util.RecipeMatcher;
 
 import java.util.ArrayList;
@@ -22,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Recipe Detail screen: cooking time, ingredient status and method for one recipe. */
 public class RecipeDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_RECIPE_ID = "recipe_id";
@@ -36,6 +39,8 @@ public class RecipeDetailActivity extends AppCompatActivity {
     private TextView textStatus;
     private TextView textIngredients;
     private TextView textSteps;
+    private TextView textDetailEmoji;
+    private ImageView imageDetail;
     private Button buttonAddMissing;
     private List<RecipeIngredient> currentMissing = new ArrayList<>();
 
@@ -54,6 +59,8 @@ public class RecipeDetailActivity extends AppCompatActivity {
         textStatus = findViewById(R.id.textDetailStatus);
         textIngredients = findViewById(R.id.textDetailIngredients);
         textSteps = findViewById(R.id.textDetailSteps);
+        textDetailEmoji = findViewById(R.id.textDetailEmoji);
+        imageDetail = findViewById(R.id.imageDetail);
         buttonAddMissing = findViewById(R.id.buttonAddMissing);
 
         recipeId = getIntent().getIntExtra(EXTRA_RECIPE_ID, -1);
@@ -65,7 +72,6 @@ public class RecipeDetailActivity extends AppCompatActivity {
         buttonAddMissing.setOnClickListener(v -> confirmAddMissing());
     }
 
-    /** Reload every time the screen is shown so the status matches the pantry. */
     @Override
     protected void onResume() {
         super.onResume();
@@ -95,6 +101,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
                 textName.setText(recipe.name);
                 textSteps.setText(recipe.steps);
+                RecipeImages.apply(this, recipe.name, imageDetail, textDetailEmoji);
                 textTime.setText(recipe.cookingTimeMinutes > 0
                         ? "Cooking time: " + recipe.cookingTimeMinutes + " min"
                         : "Cooking time not set");
@@ -102,35 +109,31 @@ public class RecipeDetailActivity extends AppCompatActivity {
                 if (missing.isEmpty()) {
                     textStatus.setText("Ready to cook - you have everything");
                     textStatus.setTextColor(COLOR_READY);
-                    buttonAddMissing.setVisibility(android.view.View.GONE);
+                    buttonAddMissing.setVisibility(View.GONE);
                 } else {
                     textStatus.setText("Missing " + missing.size() + " item(s)");
                     textStatus.setTextColor(COLOR_MISSING);
-                    buttonAddMissing.setVisibility(android.view.View.VISIBLE);
+                    buttonAddMissing.setVisibility(View.VISIBLE);
                 }
 
                 StringBuilder sb = new StringBuilder();
                 for (RecipeIngredient ri : ingredients) {
                     Double gap = shortfall.get(ri.normalizedName + "|" + ri.unit);
-                    if (gap == null) {
-                        sb.append("\u2713 ")
-                                .append(ri.name).append(" - ")
-                                .append(formatQuantity(ri.quantity)).append(" ").append(ri.unit)
-                                .append("\n");
-                    } else {
-                        sb.append("\u2717 ")
-                                .append(ri.name).append(" - ")
-                                .append(formatQuantity(ri.quantity)).append(" ").append(ri.unit)
-                                .append(" (need ").append(formatQuantity(gap)).append(" more)")
-                                .append("\n");
+                    sb.append(gap == null ? "\u2713 " : "\u2717 ")
+                            .append(IngredientIcons.emojiFor(ri.normalizedName)).append(" ")
+                            .append(ri.name).append(" - ")
+                            .append(formatQuantity(ri.quantity)).append(" ").append(ri.unit);
+                    if (gap != null) {
+                        sb.append(" (need ").append(formatQuantity(gap)).append(" more)");
                     }
+                    sb.append("\n");
                 }
                 textIngredients.setText(sb.toString().trim());
             });
         });
     }
 
-
+    /** Asks first, because this should only be used after the items were bought. */
     private void confirmAddMissing() {
         if (currentMissing.isEmpty()) return;
         new AlertDialog.Builder(this)

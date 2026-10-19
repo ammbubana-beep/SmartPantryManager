@@ -3,6 +3,7 @@ package com.aifani.smartpantrymanager.ui;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,10 +13,10 @@ import com.aifani.smartpantrymanager.R;
 import com.aifani.smartpantrymanager.data.Recipe;
 import com.aifani.smartpantrymanager.data.RecipeIngredient;
 import com.aifani.smartpantrymanager.data.RecipeMatch;
+import com.aifani.smartpantrymanager.util.RecipeImages;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
 
     public interface OnRecipeClickListener {
@@ -51,6 +52,8 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         Recipe recipe = match.recipe;
 
         holder.textRecipeName.setText(recipe.name);
+        RecipeImages.apply(holder.itemView.getContext(), recipe.name,
+                holder.imageRecipe, holder.textRecipeEmoji);
 
         if (recipe.cookingTimeMinutes > 0) {
             holder.textRecipeTime.setText("Cooking time: " + recipe.cookingTimeMinutes + " min");
@@ -83,12 +86,16 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         final TextView textRecipeName;
         final TextView textRecipeTime;
         final TextView textRecipeStatus;
+        final TextView textRecipeEmoji;
+        final ImageView imageRecipe;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             textRecipeName = itemView.findViewById(R.id.textRecipeName);
             textRecipeTime = itemView.findViewById(R.id.textRecipeTime);
             textRecipeStatus = itemView.findViewById(R.id.textRecipeStatus);
+            textRecipeEmoji = itemView.findViewById(R.id.textRecipeEmoji);
+            imageRecipe = itemView.findViewById(R.id.imageRecipe);
         }
     }
 }
