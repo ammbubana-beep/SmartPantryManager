@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.aifani.smartpantrymanager.R;
 import com.aifani.smartpantrymanager.data.PantryItem;
+import com.aifani.smartpantrymanager.util.IngredientIcons;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,17 +20,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-
-/** Binds the list of PantryItem rows from the database to the RecyclerView. */
 public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder> {
-
-    /** Lets the screen react when a row is tapped or long-pressed. */
     public interface OnItemActionListener {
         void onItemClick(PantryItem item);
         void onItemLongClick(PantryItem item);
     }
 
-    /** Items expiring within this many days count as "expiring soon". */
     private static final int SOON_DAYS = 3;
     private static final int COLOR_WARNING = 0xFFD32F2F;
 
@@ -42,13 +39,11 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         this.listener = listener;
     }
 
-    /** Replaces the data and refreshes the list. */
     public void setItems(List<PantryItem> newItems) {
         this.items = newItems;
         notifyDataSetChanged();
     }
 
-    /** Turns the expiring-soon highlight on or off (from the Settings screen). */
     public void setHighlightExpiring(boolean enabled) {
         this.highlightExpiring = enabled;
         notifyDataSetChanged();
@@ -68,6 +63,8 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
 
         holder.textName.setText(item.name);
         holder.textQuantity.setText(formatQuantity(item.quantity) + " " + item.unit);
+        IngredientIcons.apply(holder.itemView.getContext(), item,
+                holder.imageItem, holder.textEmoji);
 
         if (item.expiryDate != null) {
             String date = dateFormat.format(new Date(item.expiryDate));
@@ -101,7 +98,6 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         return items.size();
     }
 
-    /** Shows 500 instead of 500.0, but keeps 0.5 as 0.5. */
     private String formatQuantity(double quantity) {
         if (quantity == Math.floor(quantity)) {
             return String.valueOf((long) quantity);
@@ -109,11 +105,12 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         return String.valueOf(quantity);
     }
 
-    /** Holds references to the views of one row so they are not looked up again. */
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView textName;
         final TextView textQuantity;
         final TextView textExpiry;
+        final TextView textEmoji;
+        final ImageView imageItem;
         final ColorStateList defaultExpiryColors;
 
         ViewHolder(@NonNull View itemView) {
@@ -121,6 +118,8 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
             textName = itemView.findViewById(R.id.textName);
             textQuantity = itemView.findViewById(R.id.textQuantity);
             textExpiry = itemView.findViewById(R.id.textExpiry);
+            textEmoji = itemView.findViewById(R.id.textItemEmoji);
+            imageItem = itemView.findViewById(R.id.imageItem);
             defaultExpiryColors = textExpiry.getTextColors();
         }
     }

@@ -25,8 +25,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
-
-/** Pantry List screen: shows every ingredient the user currently has. */
 public class MainActivity extends AppCompatActivity implements PantryAdapter.OnItemActionListener {
 
     private PantryAdapter adapter;
@@ -67,15 +65,12 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         });
     }
 
-    /** Reloads the list and re-reads the settings whenever the screen comes back. */
     @Override
     protected void onResume() {
         super.onResume();
         adapter.setHighlightExpiring(SettingsStore.isHighlightExpiring(this));
         AppDatabase.databaseExecutor.execute(this::loadPantry);
     }
-
-    /** Reads all pantry items on a background thread, then updates the screen. */
     private void loadPantry() {
         List<PantryItem> items = AppDatabase.getInstance(getApplicationContext())
                 .pantryDao().getAll();
@@ -86,8 +81,6 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
             recyclerPantry.setVisibility(empty ? View.GONE : View.VISIBLE);
         });
     }
-
-    /** Tapping a row opens the edit screen and passes the item id in the Intent. */
     @Override
     public void onItemClick(PantryItem item) {
         Intent intent = new Intent(this, AddEditIngredientActivity.class);
@@ -95,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.OnI
         startActivity(intent);
     }
 
-    /** Long-pressing a row asks for confirmation, then deletes it. */
     @Override
     public void onItemLongClick(PantryItem item) {
         new AlertDialog.Builder(this)
