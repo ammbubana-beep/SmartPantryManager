@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 
 @Database(
         entities = {PantryItem.class, Recipe.class, RecipeIngredient.class},
-        version = 2,
+        version = 3,
         exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
