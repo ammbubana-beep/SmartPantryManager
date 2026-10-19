@@ -1,14 +1,20 @@
 package com.aifani.smartpantrymanager;
 
 import android.app.DatePickerDialog;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -17,6 +23,8 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.aifani.smartpantrymanager.data.AppDatabase;
 import com.aifani.smartpantrymanager.data.PantryItem;
+import com.aifani.smartpantrymanager.util.IngredientIcons;
+import com.aifani.smartpantrymanager.util.ImageHelper;
 import com.aifani.smartpantrymanager.util.TextNormalizer;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -25,10 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-/** Add/Edit Ingredient screen. If an item id is passed in, it edits; otherwise it adds. */
 public class AddEditIngredientActivity extends AppCompatActivity {
-
-    /** Key for the Intent extra that carries the id of the item being edited. */
     public static final String EXTRA_ITEM_ID = "item_id";
 
     private static final String[] UNITS = {"g", "kg", "ml", "l", "tsp", "tbsp", "cup", "pcs"};
@@ -40,12 +45,41 @@ public class AddEditIngredientActivity extends AppCompatActivity {
     private TextInputEditText editExpiry;
     private Spinner spinnerUnit;
     private Button buttonDelete;
+    private Button buttonAddPhoto;
+    private Button buttonRemovePhoto;
+    private ImageView imagePreview;
+    private TextView textPreviewEmoji;
 
-    private PantryItem existingItem;   // null when adding a new item
-    private Long expiryMillis;         // null when no expiry date is set
+    private PantryItem existingItem;
+    private Long expiryMillis;
+
+    private String originalImagePath;
+    private String currentImagePath;
+    private boolean saved = false;
 
     private final SimpleDateFormat dateFormat =
             new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+
+    private final ActivityResultLauncher<String> photoPicker =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) return;
+                AppDatabase.databaseExecutor.execute(() -> {
+                    String path = ImageHelper.saveFromUri(getApplicationContext(), uri);
+                    runOnUiThread(() -> {
+                        if (path == null) {
+                            Toast.makeText(this, "Could not load that picture",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (currentImagePath != null
+                                && !currentImagePath.equals(originalImagePath)) {
+                            ImageHelper.delete(currentImagePath);
+                        }
+                        currentImagePath = path;
+                        refreshPicture();
+                    });
+                });
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +101,10 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         Button buttonSave = findViewById(R.id.buttonSave);
         Button buttonClearExpiry = findViewById(R.id.buttonClearExpiry);
         buttonDelete = findViewById(R.id.buttonDelete);
+        buttonAddPhoto = findViewById(R.id.buttonAddPhoto);
+        buttonRemovePhoto = findViewById(R.id.buttonRemovePhoto);
+        imagePreview = findViewById(R.id.imagePreview);
+        textPreviewEmoji = findViewById(R.id.textPreviewEmoji);
 
         ArrayAdapter<String> unitAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item, UNITS);
@@ -81,7 +119,29 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         buttonSave.setOnClickListener(v -> saveItem());
         buttonDelete.setOnClickListener(v -> confirmDelete());
 
-        // Read the Intent: did the list screen send us an item id to edit?
+        buttonAddPhoto.setOnClickListener(v -> photoPicker.launch("image/*"));
+        buttonRemovePhoto.setOnClickListener(v -> {
+            if (currentImagePath != null && !currentImagePath.equals(originalImagePath)) {
+                ImageHelper.delete(currentImagePath);
+            }
+            currentImagePath = null;
+            refreshPicture();
+        });
+
+        editName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (currentImagePath == null) refreshPicture();
+            }
+        });
+        refreshPicture();
+
         int itemId = getIntent().getIntExtra(EXTRA_ITEM_ID, -1);
         if (itemId != -1) {
             textFormTitle.setText("Edit ingredient");
@@ -89,8 +149,23 @@ public class AddEditIngredientActivity extends AppCompatActivity {
             loadItem(itemId);
         }
     }
+    private void refreshPicture() {
+        Bitmap photo = ImageHelper.load(currentImagePath);
+        if (photo != null) {
+            imagePreview.setImageBitmap(photo);
+            imagePreview.setVisibility(View.VISIBLE);
+            textPreviewEmoji.setVisibility(View.GONE);
+            buttonRemovePhoto.setVisibility(View.VISIBLE);
+            buttonAddPhoto.setText("Change photo");
+        } else {
+            imagePreview.setVisibility(View.GONE);
+            textPreviewEmoji.setText(IngredientIcons.emojiFor(textOf(editName)));
+            textPreviewEmoji.setVisibility(View.VISIBLE);
+            buttonRemovePhoto.setVisibility(View.GONE);
+            buttonAddPhoto.setText("Add photo");
+        }
+    }
 
-    /** Loads an existing item from the database and fills the form. */
     private void loadItem(int itemId) {
         AppDatabase.databaseExecutor.execute(() -> {
             PantryItem item = AppDatabase.getInstance(getApplicationContext())
@@ -107,6 +182,9 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                 expiryMillis = item.expiryDate;
                 editExpiry.setText(item.expiryDate == null
                         ? "" : dateFormat.format(item.expiryDate));
+                originalImagePath = item.imagePath;
+                currentImagePath = item.imagePath;
+                refreshPicture();
             });
         });
     }
@@ -123,14 +201,11 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
                 cal.get(Calendar.DAY_OF_MONTH)).show();
     }
-
-    /** Validates the form; if everything is valid, saves (insert or update). */
     private void saveItem() {
         String name = textOf(editName);
         String quantityText = textOf(editQuantity);
         boolean valid = true;
 
-        // Validate the name
         if (name.isEmpty()) {
             layoutName.setError("Please enter an ingredient name");
             valid = false;
@@ -140,8 +215,6 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         } else {
             layoutName.setError(null);
         }
-
-        // Validate the quantity
         double quantity = 0;
         if (quantityText.isEmpty()) {
             layoutQuantity.setError("Please enter a quantity");
@@ -172,15 +245,23 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         item.quantity = quantity;
         item.unit = (String) spinnerUnit.getSelectedItem();
         item.expiryDate = expiryMillis;
+        item.imagePath = currentImagePath;
 
         final boolean isNew = (existingItem == null);
+        final String oldPath = originalImagePath;
+        final String newPath = currentImagePath;
         AppDatabase.databaseExecutor.execute(() -> {
             if (isNew) {
                 AppDatabase.getInstance(getApplicationContext()).pantryDao().insert(item);
             } else {
                 AppDatabase.getInstance(getApplicationContext()).pantryDao().update(item);
             }
+            // The old photo is no longer used if it was replaced or removed.
+            if (oldPath != null && !oldPath.equals(newPath)) {
+                ImageHelper.delete(oldPath);
+            }
             runOnUiThread(() -> {
+                saved = true;
                 Toast.makeText(this, isNew ? "Ingredient added" : "Ingredient updated",
                         Toast.LENGTH_SHORT).show();
                 finish();
@@ -197,6 +278,7 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                         AppDatabase.databaseExecutor.execute(() -> {
                             AppDatabase.getInstance(getApplicationContext())
                                     .pantryDao().delete(existingItem);
+                            ImageHelper.delete(existingItem.imagePath);
                             runOnUiThread(() -> {
                                 Toast.makeText(this, "Ingredient deleted",
                                         Toast.LENGTH_SHORT).show();
@@ -205,6 +287,13 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                         }))
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!saved && currentImagePath != null && !currentImagePath.equals(originalImagePath)) {
+            ImageHelper.delete(currentImagePath);
+        }
     }
 
     private String textOf(TextInputEditText field) {
