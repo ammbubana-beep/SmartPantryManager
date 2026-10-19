@@ -12,17 +12,18 @@ import java.util.List;
 public interface PantryDao {
 
     @Insert
-    long insert(PantryItem item);                 // Create
+    long insert(PantryItem item);
 
     @Query("SELECT * FROM pantry_items ORDER BY name COLLATE NOCASE")
-    List<PantryItem> getAll();                    // Read (list)
+    List<PantryItem> getAll();
 
     @Query("SELECT * FROM pantry_items WHERE id = :id")
-    PantryItem getById(int id);                   // Read (one, for editing)
+    PantryItem getById(int id);
 
     @Update
-    void update(PantryItem item);                 // Update
+    void update(PantryItem item);
 
     @Delete
-    void delete(PantryItem item);                 // Delete
-}
+    void delete(PantryItem item);
+
+}                            ImageHelper.delete(item.imagePath);
