@@ -20,6 +20,7 @@ import com.aifani.smartpantrymanager.data.DatabaseSeeder;
 import com.aifani.smartpantrymanager.data.PantryItem;
 import com.aifani.smartpantrymanager.ui.PantryAdapter;
 import com.aifani.smartpantrymanager.util.NavigationHelper;
+import com.aifani.smartpantrymanager.util.ImageHelper;
 import com.aifani.smartpantrymanager.util.SettingsStore;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
