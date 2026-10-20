@@ -47,7 +47,6 @@ public final class RecipeImages {
         }
         return DEFAULT_ICON;
     }
-
     public static void apply(Context context, String recipeName,
                              ImageView image, TextView emoji) {
         int resId = context.getResources().getIdentifier(

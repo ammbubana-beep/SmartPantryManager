@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 public class RecipeDetailActivity extends AppCompatActivity {
-
     public static final String EXTRA_RECIPE_ID = "recipe_id";
 
     private static final int COLOR_READY = 0xFF2E7D32;
@@ -71,7 +70,6 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         buttonAddMissing.setOnClickListener(v -> confirmAddMissing());
     }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -132,8 +130,6 @@ public class RecipeDetailActivity extends AppCompatActivity {
             });
         });
     }
-
-    /** Asks first, because this should only be used after the items were bought. */
     private void confirmAddMissing() {
         if (currentMissing.isEmpty()) return;
         new AlertDialog.Builder(this)
@@ -144,7 +140,6 @@ public class RecipeDetailActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
-
     private void addMissingToPantry() {
         final List<RecipeIngredient> toAdd = new ArrayList<>(currentMissing);
         AppDatabase.databaseExecutor.execute(() -> {

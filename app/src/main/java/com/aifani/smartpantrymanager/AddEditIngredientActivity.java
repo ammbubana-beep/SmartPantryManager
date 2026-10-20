@@ -165,7 +165,6 @@ public class AddEditIngredientActivity extends AppCompatActivity {
             buttonAddPhoto.setText("Add photo");
         }
     }
-
     private void loadItem(int itemId) {
         AppDatabase.databaseExecutor.execute(() -> {
             PantryItem item = AppDatabase.getInstance(getApplicationContext())
@@ -215,6 +214,7 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         } else {
             layoutName.setError(null);
         }
+
         double quantity = 0;
         if (quantityText.isEmpty()) {
             layoutQuantity.setError("Please enter a quantity");

@@ -16,8 +16,6 @@ public class PantryItem {
     public double quantity;
 
     public String unit;
-
     public Long expiryDate;
-
     public String imagePath;
 }
