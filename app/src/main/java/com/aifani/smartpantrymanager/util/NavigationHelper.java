@@ -9,7 +9,6 @@ import com.aifani.smartpantrymanager.SettingsActivity;
 import com.aifani.smartpantrymanager.SuggestedRecipesActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-/** Connects the bottom navigation bar to the three main screens using Intents. */
 public final class NavigationHelper {
 
     private NavigationHelper() { }
@@ -34,7 +33,6 @@ public final class NavigationHelper {
             activity.startActivity(intent);
             activity.overridePendingTransition(0, 0);
 
-            // Keep the back stack short: only the Pantry screen stays underneath.
             if (!(activity instanceof MainActivity)) {
                 activity.finish();
             }

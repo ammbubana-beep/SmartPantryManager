@@ -25,5 +25,4 @@ public interface PantryDao {
 
     @Delete
     void delete(PantryItem item);
-
-}                            ImageHelper.delete(item.imagePath);
+}

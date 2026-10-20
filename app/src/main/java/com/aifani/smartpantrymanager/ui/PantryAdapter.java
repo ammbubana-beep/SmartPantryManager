@@ -1,126 +1,140 @@
 package com.aifani.smartpantrymanager.ui;
 
-import android.content.res.ColorStateList;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.aifani.smartpantrymanager.R;
+import com.aifani.smartpantrymanager.data.AppDatabase;
 import com.aifani.smartpantrymanager.data.PantryItem;
-import com.aifani.smartpantrymanager.util.IngredientIcons;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
+
 public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder> {
+
     public interface OnItemActionListener {
         void onItemClick(PantryItem item);
         void onItemLongClick(PantryItem item);
+        void loadPantry();
     }
 
-    private static final int SOON_DAYS = 3;
-    private static final int COLOR_WARNING = 0xFFD32F2F;
-
-    private List<PantryItem> items = new ArrayList<>();
+    private final Context context;
+    private final List<PantryItem> pantryList;
     private final OnItemActionListener listener;
-    private boolean highlightExpiring = true;
-    private final SimpleDateFormat dateFormat =
-            new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+    private boolean highlightExpiring = false;
 
-    public PantryAdapter(OnItemActionListener listener) {
+    public PantryAdapter(Context context) {
+        this.context = context;
+        this.pantryList = new ArrayList<>();
+        this.listener = context instanceof OnItemActionListener ? (OnItemActionListener) context : null;
+    }
+    public PantryAdapter(Context context, List<PantryItem> list, OnItemActionListener listener) {
+        this.context = context;
+        this.pantryList = list != null ? list : new ArrayList<>();
         this.listener = listener;
     }
-
-    public void setItems(List<PantryItem> newItems) {
-        this.items = newItems;
+    public void setHighlightExpiring(boolean highlight) {
+        this.highlightExpiring = highlight;
         notifyDataSetChanged();
     }
-
-    public void setHighlightExpiring(boolean enabled) {
-        this.highlightExpiring = enabled;
+    public void setItems(List<PantryItem> items) {
+        pantryList.clear();
+        if (items != null) pantryList.addAll(items);
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_pantry, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_pantry, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        PantryItem item = items.get(position);
+        PantryItem item = pantryList.get(position);
 
         holder.textName.setText(item.name);
-        holder.textQuantity.setText(formatQuantity(item.quantity) + " " + item.unit);
-        IngredientIcons.apply(holder.itemView.getContext(), item,
-                holder.imageItem, holder.textEmoji);
+        holder.textQuantity.setText(String.valueOf(item.quantity) + " " + String.valueOf(item.unit));
 
         if (item.expiryDate != null) {
-            String date = dateFormat.format(new Date(item.expiryDate));
-            long millisLeft = item.expiryDate - System.currentTimeMillis();
-            long daysLeft = TimeUnit.MILLISECONDS.toDays(millisLeft);
-
-            if (highlightExpiring && millisLeft < 0) {
-                holder.textExpiry.setText("Expired: " + date);
-                holder.textExpiry.setTextColor(COLOR_WARNING);
-            } else if (highlightExpiring && daysLeft <= SOON_DAYS) {
-                holder.textExpiry.setText("Expires soon: " + date);
-                holder.textExpiry.setTextColor(COLOR_WARNING);
-            } else {
-                holder.textExpiry.setText("Expires: " + date);
-                holder.textExpiry.setTextColor(holder.defaultExpiryColors);
-            }
-            holder.textExpiry.setVisibility(View.VISIBLE);
+            holder.textExpiry.setText(String.valueOf(item.expiryDate));
         } else {
-            holder.textExpiry.setVisibility(View.GONE);
+            holder.textExpiry.setText("");
         }
 
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
+        if (highlightExpiring) {
+            holder.itemView.setAlpha(0.9f);
+
+        }
+
+        if (item.imagePath != null && !item.imagePath.isEmpty()) {
+            holder.imageItem.setVisibility(View.VISIBLE);
+            holder.textItemEmoji.setVisibility(View.GONE);
+        } else {
+            holder.imageItem.setVisibility(View.GONE);
+            holder.textItemEmoji.setVisibility(View.VISIBLE);
+            holder.textItemEmoji.setText("🥫");
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onItemClick(item);
+        });
+
         holder.itemView.setOnLongClickListener(v -> {
-            listener.onItemLongClick(item);
+            showDeleteDialog(item);
             return true;
         });
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return pantryList.size();
     }
 
-    private String formatQuantity(double quantity) {
-        if (quantity == Math.floor(quantity)) {
-            return String.valueOf((long) quantity);
-        }
-        return String.valueOf(quantity);
+    private void showDeleteDialog(PantryItem item) {
+        new androidx.appcompat.app.AlertDialog.Builder(context)
+                .setTitle("Delete Item")
+                .setMessage("Remove " + item.name + " from your pantry?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    AppDatabase.databaseExecutor.execute(() -> {
+                        AppDatabase.getInstance(context).pantryDao().delete(item);
+                        if (context instanceof android.app.Activity) {
+                            ((android.app.Activity) context).runOnUiThread(() -> {
+                                int pos = pantryList.indexOf(item);
+                                if (pos != -1) {
+                                    pantryList.remove(pos);
+                                    notifyItemRemoved(pos);
+                                }
+                                if (listener != null) listener.loadPantry();
+                                Toast.makeText(context, "Ingredient deleted", Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView textName;
-        final TextView textQuantity;
-        final TextView textExpiry;
-        final TextView textEmoji;
-        final ImageView imageItem;
-        final ColorStateList defaultExpiryColors;
-
-        ViewHolder(@NonNull View itemView) {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView textName, textQuantity, textExpiry, textItemEmoji;
+        ImageView imageItem;
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             textName = itemView.findViewById(R.id.textName);
             textQuantity = itemView.findViewById(R.id.textQuantity);
             textExpiry = itemView.findViewById(R.id.textExpiry);
-            textEmoji = itemView.findViewById(R.id.textItemEmoji);
             imageItem = itemView.findViewById(R.id.imageItem);
-            defaultExpiryColors = textExpiry.getTextColors();
+            textItemEmoji = itemView.findViewById(R.id.textItemEmoji);
         }
     }
 }
