@@ -8,7 +8,7 @@
         style="@style/SectionTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/pantry_pulse_title"/>
+        android:text="@string/pantry_pulse_title" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,50 +18,92 @@
         android:weightSum="3">
 
         <LinearLayout
-            android:layout_width="0dp" android:layout_weight="1"
+            android:id="@+id/cardPulseTotal"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:layout_weight="1"
             android:background="@drawable/bg_card"
-            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
+            android:orientation="vertical"
             android:padding="14dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/pantry_pulse_total" android:textColor="@color/text_secondary"/>
-            <TextView android:id="@+id/tvPulseTotal"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="0" android:textSize="32sp" android:textStyle="bold"
-                android:textColor="@color/stat_total"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pantry_pulse_total"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvPulseTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/stat_total"
+                android:textSize="32sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="0dp" android:layout_weight="1"
+            android:id="@+id/cardPulseSoon"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:layout_weight="1"
             android:background="@drawable/bg_card"
-            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
+            android:orientation="vertical"
             android:padding="14dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/pantry_pulse_soon" android:textColor="@color/text_secondary"/>
-            <TextView android:id="@+id/tvPulseSoon"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="0" android:textSize="32sp" android:textStyle="bold"
-                android:textColor="@color/stat_coming_up"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pantry_pulse_soon"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvPulseSoon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/stat_coming_up"
+                android:textSize="32sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="0dp" android:layout_weight="1"
+            android:id="@+id/cardPulseExpired"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:background="@drawable/bg_card"
-            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
+            android:orientation="vertical"
             android:padding="14dp">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/pantry_pulse_expired" android:textColor="@color/text_secondary"/>
-            <TextView android:id="@+id/tvPulseExpired"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="0" android:textSize="32sp" android:textStyle="bold"
-                android:textColor="@color/stat_expired"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pantry_pulse_expired"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvPulseExpired"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/stat_expired"
+                android:textSize="32sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

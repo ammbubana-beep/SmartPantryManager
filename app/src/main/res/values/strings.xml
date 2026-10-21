@@ -4,4 +4,9 @@
     <string name="pantry_pulse_total">Total</string>
     <string name="pantry_pulse_soon">Coming up</string>
     <string name="pantry_pulse_expired">Past date</string>
+    <string name="alerts_back">← Back</string>
+    <string name="alerts_title">Pantry Alerts</string>
+    <string name="alerts_subtitle">Know what to use first.</string>
+    <string name="alerts_fresh">✓ Nothing is expiring. Your pantry is fresh.</string>
+    <string name="alerts_tabs_description">Pantry filter tabs</string>
 </resources>
