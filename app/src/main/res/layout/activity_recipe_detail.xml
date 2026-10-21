@@ -5,104 +5,225 @@
     android:id="@+id/detailRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/page_background"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <com.google.android.material.card.MaterialCardView
+        <!-- Hero photo -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="12dp"
-            app:cardBackgroundColor="#E8F5E9"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
+            android:layout_height="280dp"
+            android:background="@drawable/bg_hero_gradient">
 
-            <FrameLayout
+            <ImageView
+                android:id="@+id/imageDetail"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:contentDescription="Recipe picture"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
 
-                <ImageView
-                    android:id="@+id/imageDetail"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:contentDescription="Recipe picture"
-                    android:scaleType="centerCrop"
-                    android:visibility="gone" />
+            <TextView
+                android:id="@+id/textDetailEmoji"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="96sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/bg_photo_scrim" />
+
+            <TextView
+                android:id="@+id/textDetailName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:padding="20dp"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Info chips -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/textDetailEmoji"
+                    android:id="@+id/textDetailTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip"
+                    android:paddingStart="14dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="14dp"
+                    android:paddingBottom="6dp"
+                    android:textColor="@color/brand_primary_dark"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textDetailDifficulty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_chip"
+                    android:paddingStart="14dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="14dp"
+                    android:paddingBottom="6dp"
+                    android:textColor="@color/brand_primary_dark"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Status pill -->
+            <TextView
+                android:id="@+id/textDetailStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_pill_ready"
+                android:paddingStart="14dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="6dp"
+                android:textColor="@color/ready_text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <!-- Ingredients card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/card_stroke"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textSize="80sp" />
-            </FrameLayout>
-        </com.google.android.material.card.MaterialCardView>
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-        <TextView
-            android:id="@+id/textDetailName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="26sp"
-            android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/textIngredientsTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ingredients"
+                        android:textColor="@color/brand_primary_dark"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/textDetailTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textSize="16sp" />
+                    <TextView
+                        android:id="@+id/textDetailIngredients"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:lineSpacingExtra="4dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/textDetailStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+                    <Button
+                        android:id="@+id/buttonAddMissing"
+                        style="@style/PurpleButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Add missing items to my pantry"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Ingredients"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            <!-- Method card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@color/card_background"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/card_stroke"
+                app:strokeWidth="1dp">
 
-        <TextView
-            android:id="@+id/textDetailIngredients"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:lineSpacingExtra="4dp"
-            android:textSize="16sp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-        <Button
-            android:id="@+id/buttonAddMissing"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Add missing items to my pantry"
-            android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/textMethodTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Method"
+                        android:textColor="@color/brand_primary_dark"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Method"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+                    <LinearLayout
+                        android:id="@+id/layoutDetailSteps"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            android:id="@+id/textDetailSteps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:lineSpacingExtra="4dp"
-            android:textSize="16sp" />
+            <!-- Chef's tip card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardDetailTip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/brand_primary_light"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💡 Chef's tip"
+                        android:textColor="@color/brand_primary_dark"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textDetailTip"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:lineSpacingExtra="4dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

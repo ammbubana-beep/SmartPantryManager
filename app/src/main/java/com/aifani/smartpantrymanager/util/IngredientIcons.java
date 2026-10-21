@@ -9,12 +9,12 @@ import android.widget.TextView;
 import com.aifani.smartpantrymanager.data.PantryItem;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public final class IngredientIcons {
 
     private static final String DEFAULT_ICON = "\uD83C\uDF7D\uFE0F";
-
     private static final Map<String, String> ICONS = new LinkedHashMap<>();
 
     static {
@@ -56,6 +56,7 @@ public final class IngredientIcons {
         }
         return DEFAULT_ICON;
     }
+
     public static void apply(Context context, PantryItem item,
                              ImageView image, TextView emoji) {
         Bitmap photo = ImageHelper.load(item.imagePath);
@@ -63,10 +64,44 @@ public final class IngredientIcons {
             image.setImageBitmap(photo);
             image.setVisibility(View.VISIBLE);
             emoji.setVisibility(View.GONE);
+            return;
+        }
+
+        int resId = bundledPhotoId(context, item.name);
+        if (resId != 0) {
+            image.setImageResource(resId);
+            image.setVisibility(View.VISIBLE);
+            emoji.setVisibility(View.GONE);
         } else {
             image.setVisibility(View.GONE);
             emoji.setText(emojiFor(item.name));
             emoji.setVisibility(View.VISIBLE);
         }
+    }
+
+    private static int bundledPhotoId(Context context, String name) {
+        if (name == null) return 0;
+
+        int id = findDrawable(context, "food_" + slug(name));
+        if (id != 0) return id;
+
+        String normalized = TextNormalizer.normalizeName(name);
+        for (String key : ICONS.keySet()) {
+            if (normalized.contains(key)) {
+                return findDrawable(context, "food_" + slug(key));
+            }
+        }
+        return 0;
+    }
+
+    private static int findDrawable(Context context, String resName) {
+        return context.getResources()
+                .getIdentifier(resName, "drawable", context.getPackageName());
+    }
+
+    private static String slug(String text) {
+        return text.toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", "_")
+                .replaceAll("^_+|_+$", "");
     }
 }

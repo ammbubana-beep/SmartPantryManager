@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SmartPantryManager</string>
+    <string name="pantry_pulse_title">Pantry Pulse</string>
+    <string name="pantry_pulse_total">Total</string>
+    <string name="pantry_pulse_soon">Coming up</string>
+    <string name="pantry_pulse_expired">Past date</string>
 </resources>

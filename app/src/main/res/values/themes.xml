@@ -1,6 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Base.Theme.SmartPantryManager" parent="Theme.Material3.Light.NoActionBar">
+
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryDark">@color/brand_primary_dark</item>
+        <item name="android:statusBarColor">@color/brand_primary_dark</item>
+        <item name="android:windowBackground">@color/page_background</item>
         <item name="colorPrimary">@color/pantry_green</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorPrimaryContainer">@color/pantry_green_light</item>
