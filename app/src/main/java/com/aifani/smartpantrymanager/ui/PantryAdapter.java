@@ -1,5 +1,6 @@
 package com.aifani.smartpantrymanager.ui;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.aifani.smartpantrymanager.R;
@@ -20,14 +22,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
 public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder> {
 
     public interface OnItemActionListener {
         void onItemClick(PantryItem item);
         void onItemLongClick(PantryItem item);
     }
+
     private static final int SOON_DAYS = 3;
-    private static final int COLOR_WARNING = 0xFFD32F2F;
 
     private List<PantryItem> items = new ArrayList<>();
     private final OnItemActionListener listener;
@@ -38,10 +41,12 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
     public PantryAdapter(OnItemActionListener listener) {
         this.listener = listener;
     }
+
     public void setItems(List<PantryItem> newItems) {
         this.items = newItems;
         notifyDataSetChanged();
     }
+
     public void setHighlightExpiring(boolean enabled) {
         this.highlightExpiring = enabled;
         notifyDataSetChanged();
@@ -58,11 +63,11 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         PantryItem item = items.get(position);
+        Context context = holder.itemView.getContext();
 
         holder.textName.setText(item.name);
         holder.textQuantity.setText(formatQuantity(item.quantity) + " " + item.unit);
-        IngredientIcons.apply(holder.itemView.getContext(), item,
-                holder.imageItem, holder.textEmoji);
+        IngredientIcons.apply(context, item, holder.imageItem, holder.textEmoji);
 
         if (item.expiryDate != null) {
             String date = dateFormat.format(new Date(item.expiryDate));
@@ -71,10 +76,12 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
 
             if (highlightExpiring && millisLeft < 0) {
                 holder.textExpiry.setText("Expired: " + date);
-                holder.textExpiry.setTextColor(COLOR_WARNING);
+                holder.textExpiry.setTextColor(
+                        ContextCompat.getColor(context, R.color.stat_expired));
             } else if (highlightExpiring && daysLeft <= SOON_DAYS) {
                 holder.textExpiry.setText("Expires soon: " + date);
-                holder.textExpiry.setTextColor(COLOR_WARNING);
+                holder.textExpiry.setTextColor(
+                        ContextCompat.getColor(context, R.color.stat_coming_up));
             } else {
                 holder.textExpiry.setText("Expires: " + date);
                 holder.textExpiry.setTextColor(holder.defaultExpiryColors);
@@ -96,13 +103,13 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         return items.size();
     }
 
-    /** Shows 500 instead of 500.0, but keeps 0.5 as 0.5. */
     private String formatQuantity(double quantity) {
         if (quantity == Math.floor(quantity)) {
             return String.valueOf((long) quantity);
         }
         return String.valueOf(quantity);
     }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView textName;
         final TextView textQuantity;
